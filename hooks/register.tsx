@@ -5,7 +5,7 @@ import { buildDigest, cleanLine, isDue, newTurn, spinnerMessage, splitLine, SYST
 import type { Turn } from './logic'
 import type { Line } from '../types'
 
-const line = atom({ plugin: 'turn-gist', key: 'line' } as const, null as Line)
+const line = atom({ plugin: 'glance', key: 'line' } as const, null as Line)
 
 export const register: Register = on => {
   // Module state is lost on a hot reload; the next turn.start rebuilds it.
@@ -40,7 +40,7 @@ export const register: Register = on => {
         if (turn !== t) return // a new turn started while Haiku was answering
         await update($, line, () => cleanLine(reply.text))
       } catch (error) {
-        if (!hasLoggedFailure) $.ui.log(`turn-gist: no summary (${error instanceof Error ? error.message : error})`)
+        if (!hasLoggedFailure) $.ui.log(`glance: no summary (${error instanceof Error ? error.message : error})`)
         hasLoggedFailure = true
       } finally {
         isBusy = false

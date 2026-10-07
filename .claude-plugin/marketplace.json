@@ -1,12 +1,12 @@
 {
-  "name": "turn-gist",
-  "description": "turn-gist: a one-line summary of what Claude is doing and why.",
+  "name": "glance",
+  "description": "glance: a one-line summary of what Claude is doing and why.",
   "owner": {
     "name": "Will Mayner"
   },
   "plugins": [
     {
-      "name": "turn-gist",
+      "name": "glance",
       "source": "./",
       "description": "Shows what Claude is doing and why: in the spinner during long turns, and above the prompt after the turn ends."
     }

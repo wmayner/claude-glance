@@ -112,10 +112,10 @@ test('a long turn gets a line in the spinner, then in the band once it ends', as
   expect(asks).toHaveLength(1)
   expect(asks[0]).toContain('Current user request:\nshow cache warmth')
 
-  const sub = await $.ui.mount({ plugin: 'turn-gist', surface: 'terminal', component: 'Spinner', props: SPINNER, requestId: 'agent-1' })
+  const sub = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'Spinner', props: SPINNER, requestId: 'agent-1' })
   expect(spinnerProps?.message).toBe(null) // a subagent's spinner is left alone
   await sub.unmount()
-  const spinner = await $.ui.mount({ plugin: 'turn-gist', surface: 'terminal', component: 'Spinner', props: SPINNER, requestId: 'main' })
+  const spinner = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'Spinner', props: SPINNER, requestId: 'main' })
   expect(spinnerProps?.message).toBe(LINE) // first line only, quotes stripped
 
   await clock.advance(60_000)
@@ -127,7 +127,7 @@ test('a long turn gets a line in the spinner, then in the band once it ends', as
 
   await $.turn.complete({ answer: 'done', durationMs: 120_000, isAborted: false, turnId: 't1', reason: 'answer' })
   for (const surface of ['terminal', 'desktop'] as const) {
-    const band = await $.ui.mount({ plugin: 'turn-gist', surface, component: 'AbovePrompt', props: BAND })
+    const band = await $.ui.mount({ plugin: 'glance', surface, component: 'AbovePrompt', props: BAND })
     expect(await bandText(band)).toEqual([`Last turn: ${WHAT}`, 'Last turn:', `Why: ${WHY}`, 'Why:'])
     await band.unmount()
   }
@@ -138,7 +138,7 @@ test('a long turn gets a line in the spinner, then in the band once it ends', as
   await $.turn.start({ text: 'quick question', turnId: 't2' })
   await spinner.redraw()
   expect(spinnerProps?.message).toBe(null) // engine's own word again
-  const band = await $.ui.mount({ plugin: 'turn-gist', surface: 'terminal', component: 'AbovePrompt', props: BAND })
+  const band = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'AbovePrompt', props: BAND })
   expect((await band.find({ type: 'Text' }))?.text).toBe('engine')
 })
 
@@ -204,6 +204,6 @@ test('a turn with no typed prompt continues the previous one and keeps its line'
   await $.turn.complete({ answer: '', durationMs: 30_000, isAborted: false, turnId: 't1', reason: 'answer' })
   await $.turn.start({ text: '', turnId: 't2' })
   await $.turn.complete({ answer: '', durationMs: 1_000, isAborted: false, turnId: 't2', reason: 'answer' })
-  const band = await $.ui.mount({ plugin: 'turn-gist', surface: 'terminal', component: 'AbovePrompt', props: BAND })
+  const band = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'AbovePrompt', props: BAND })
   expect(await bandText(band)).toEqual([`Last turn: ${WHAT}`, 'Last turn:', `Why: ${WHY}`, 'Why:'])
 })

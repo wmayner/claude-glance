@@ -1,11 +1,11 @@
 {
-  "name": "turn-gist",
+  "name": "glance",
   "version": "0.1.0",
   "description": "Shows what Claude is doing and why: in the spinner during long turns, and above the prompt after the turn ends.",
   "author": {
     "name": "Will Mayner"
   },
-  "repository": "https://github.com/wmayner/turn-gist",
+  "repository": "https://github.com/wmayner/claude-glance",
   "license": "MIT",
   "keywords": ["status", "spinner", "summary", "mod"],
   "types": "./types/index.d.ts"

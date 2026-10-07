@@ -1,7 +1,7 @@
-# turn-gist
+# glance
 
 During a long turn it can be hard to tell what Claude is doing, and easy to
-forget what you asked for in the first place. turn-gist is a Claude Code mod
+forget what you asked for in the first place. Glance is a Claude Code mod
 that shows both in one line. Once a turn has run for 20 seconds, the spinner's
 usual word is replaced with a summary of the current step and the reason for
 it, followed as usual by the elapsed time and token count:
@@ -22,21 +22,21 @@ The summaries are written by Claude Haiku.
 
 ## Requirements
 
-Claude Code, in the terminal or the desktop app's Code tab. turn-gist is
+Claude Code, in the terminal or the desktop app's Code tab. Glance is
 written against Claude Code's mod API, which is in early access and can change
 between releases. It was tested with Claude Code 2.1.292.
 
 ## Installation
 
 ```
-claude plugin marketplace add wmayner/turn-gist
-claude plugin install turn-gist@turn-gist
+claude plugin marketplace add wmayner/claude-glance
+claude plugin install glance@glance
 ```
 
 Or, at the prompt of a running session:
 
 ```
-/plugin install turn-gist --marketplace wmayner/turn-gist
+/plugin install glance --marketplace wmayner/claude-glance
 ```
 
 Installed with `/plugin`, it starts working in that session right away.
@@ -45,7 +45,7 @@ Either way, it runs in every session you start afterwards.
 ## How it works
 
 - A turn shorter than 20 seconds is left alone and costs nothing.
-- In a longer turn, turn-gist asks Haiku for a new line at most once a minute,
+- In a longer turn, Glance asks Haiku for a new line at most once a minute,
   and only when Claude has called a tool since the last one.
 - Haiku sees your current request, the request and reply before it (so that
   "yes, do that" still has its context), Claude's last few messages in the
@@ -69,8 +69,8 @@ anywhere else.
 ## Updating and uninstalling
 
 ```
-claude plugin update turn-gist@turn-gist
-claude plugin uninstall turn-gist@turn-gist
+claude plugin update glance@glance
+claude plugin uninstall glance@glance
 ```
 
 Restart Claude Code after an update, or run `/reload-plugins`.
@@ -80,7 +80,7 @@ Restart Claude Code after an update, or run `/reload-plugins`.
 Run a session with your working copy loaded:
 
 ```
-claude --plugin-dir /path/to/turn-gist
+claude --plugin-dir /path/to/claude-glance
 ```
 
 Saving a file reloads the mod at the end of the current turn. To check the
