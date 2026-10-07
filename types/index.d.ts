@@ -1,7 +1,7 @@
-export type Line = string | null
+export type Summary = { doing: string; why: string }
 
 declare module 'claude-code' {
   interface PluginState {
-    'glance': { line: Line }
+    glance: { summary: Summary | null; isOff: boolean }
   }
 }

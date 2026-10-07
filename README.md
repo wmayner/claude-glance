@@ -3,11 +3,11 @@
 During a long turn it can be hard to tell what Claude is doing, and easy to
 forget what you asked for in the first place. Glance is a Claude Code mod
 that shows both, in two rows above the prompt. Once a turn has run for 20
-seconds, they say what Claude is doing right now and why:
+seconds, they say in plain language what Claude is working on and why:
 
 ```
-Now: Running the test suite on the installed copy
-Why: to check the 0.1.1 release before announcing it
+Now: Checking that the new release installs and works on both computers
+Why: You want to be sure it is ready before sharing it
 ```
 
 When the turn ends, the last summary stays there until you send your next
@@ -15,7 +15,9 @@ message, so you can see at a glance what produced the turn:
 
 ![Above the prompt after the turn: "Last turn: Testing glance spinner on mats-dev for 20s" and "Why: to verify time display and animation don't interfere with rendering"](assets/band.png)
 
-The summaries are written by Claude Haiku.
+The summaries are written by Claude Haiku, for someone who is keeping an eye
+on the work rather than following each step, so they describe the goal
+rather than the individual files and commands.
 
 ## Requirements
 
@@ -42,17 +44,26 @@ Either way, it runs in every session you start afterwards.
 ## How it works
 
 - A turn shorter than 20 seconds is left alone and costs nothing.
-- In a longer turn, Glance asks Haiku for a new line at most once a minute,
+- In a longer turn, Glance asks Haiku for a new summary at most once a minute,
   and only when Claude has called a tool since the last one.
-- Haiku sees your current request, the request and reply before it (so that
-  "yes, do that" still has its context), Claude's last few messages in the
-  turn, and its last ten tool calls. It also sees the previous line, so the
-  reason stays the same from one update to the next unless the goal changes.
-- If a Haiku call fails, the previous line stays where it is and the reason
-  for the failure is logged once in the transcript.
+- Haiku sees the request that started the turn, your two requests before it
+  (so that "yes, do that" still has its context), Claude's last four messages
+  and its last fifteen tool calls, each marked if it is still running or
+  failed. Reminders and other text that Claude Code adds to your messages are
+  removed first. Haiku also sees the previous summary, so the reason stays the
+  same from one update to the next unless the goal changes.
+- If a Haiku call fails, the previous summary stays where it is, and the
+  failure is written to the debug log.
 
 Only the main conversation is summarized. The spinner is left as Claude Code
 draws it.
+
+## The /glance command
+
+- `/glance` asks for a summary now, even during a short turn.
+- `/glance off` hides the summaries and stops the Haiku calls, in this session
+  and the ones after it.
+- `/glance on` turns them back on.
 
 ## Cost and privacy
 
@@ -94,7 +105,10 @@ touch the second file. Claude Code writes the API's type declarations into
 
 ## Credits
 
-The idea for glance came from Niall Dalton.
+The idea for glance came from Niall Dalton
+([@ndalton12](https://github.com/ndalton12)). His own version, now-doing, also
+gave glance its plain-language summaries, the `/glance` command and the
+removal of injected text from your requests.
 
 ## License
 
