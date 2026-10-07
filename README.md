@@ -10,6 +10,9 @@ it, followed as usual by the elapsed time and token count:
 Editing statusline.sh to parse cache stats · so the status line shows cache warmth…
 ```
 
+In a narrow terminal the line is shortened so that it stays on one row and
+the elapsed time still fits.
+
 When the turn ends, the last summary stays above the prompt until you send
 your next message, so you can see at a glance what produced the turn:
 

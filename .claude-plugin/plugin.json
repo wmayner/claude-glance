@@ -1,6 +1,6 @@
 {
   "name": "glance",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shows what Claude is doing and why: in the spinner during long turns, and above the prompt after the turn ends.",
   "author": {
     "name": "Will Mayner"

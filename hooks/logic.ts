@@ -37,7 +37,7 @@ export function isDue(t: Turn, now: number): boolean {
 export const SYSTEM = `You write the one-line status shown while a coding agent works on a user's request.
 Reply with exactly one line and nothing else, in the form:
 <what the agent is doing right now> · <why: the user's goal>
-At most 90 characters. Be concrete: name files, commands or components. Start the first half with a present participle.
+At most 70 characters. Be concrete: name files, commands or components. Start the first half with a present participle.
 Example: Editing statusline.sh to parse cache stats · so the status line shows cache warmth
 Only use file names and commands that appear in the input; never guess a file's extension.
 If a previous line is given, keep its second half unless the goal clearly changed.`
@@ -92,9 +92,23 @@ export function splitLine(line: string): { what: string; why: string } {
   return { what, why }
 }
 
-/** What the spinner shows: our line, or the engine's own message (a todo's text) plus our why. */
-export function spinnerMessage(line: string, engineMessage: string | null): string {
-  if (!engineMessage) return line
+// Room the spinner row keeps for the engine's own parts: the glyph before the text,
+// and after it the elapsed time, token count and state, as in
+// "(1m 12s · ↓ 3.4k tokens · thinking)". A longer row wraps, and the spinner's
+// animation then breaks it at a different place on every frame.
+const SPINNER_RESERVE = 45
+const SPINNER_MIN = 20
+
+/**
+ * What the spinner shows: our line, or the engine's own message (a todo's text)
+ * plus our why, cut to fit one row of `columns`. Null when the row is too narrow
+ * to fit a useful part of it, so the engine's own word stays.
+ */
+export function spinnerMessage(line: string, engineMessage: string | null, columns?: number): string | null {
   const { why } = splitLine(line)
-  return why ? `${engineMessage.replace(/…$/, '')} · ${why}` : engineMessage
+  const text = !engineMessage ? line : why ? `${engineMessage.replace(/…$/, '')} · ${why}` : engineMessage
+  if (columns === undefined) return text
+  const room = columns - SPINNER_RESERVE
+  if (room < SPINNER_MIN) return engineMessage
+  return text.length > room ? text.slice(0, room - 1).trimEnd() + '…' : text
 }

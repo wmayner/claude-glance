@@ -78,7 +78,8 @@ export const register: Register = on => {
     if (e.requestId !== (await $.session.id())) return next(e)
     const text = await read($, line)
     if (text === null) return next(e)
-    return next({ ...e, props: { ...e.props, message: spinnerMessage(text, e.props.message) } })
+    const message = spinnerMessage(text, e.props.message, e.viewport?.columns)
+    return next({ ...e, props: { ...e.props, message } })
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {

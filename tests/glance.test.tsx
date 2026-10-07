@@ -45,6 +45,16 @@ test('spinnerMessage keeps a todo message and adds the why', () => {
   expect(spinnerMessage('no separator', 'Running tests…')).toBe('Running tests…')
 })
 
+test('spinnerMessage fits one row and leaves room for the time and token count', () => {
+  const long = 'Bumping CI actions to v7 and pushing to github · so the plugin passes latest action version requirements'
+  expect(spinnerMessage(long, null, 200)).toBe(long)
+  const cut = spinnerMessage(long, null, 100)
+  expect(cut?.length).toBe(55)
+  expect(cut?.endsWith('…')).toBe(true)
+  expect(spinnerMessage(long, null, 50)).toBe(null) // too narrow: the engine's word stays
+  expect(spinnerMessage(long, 'Running tests…', 50)).toBe('Running tests…')
+})
+
 test('buildDigest centres on the last typed prompt, not tool results', () => {
   const digest = buildDigest(
     [
@@ -115,6 +125,16 @@ test('a long turn gets a line in the spinner, then in the band once it ends', as
   const sub = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'Spinner', props: SPINNER, requestId: 'agent-1' })
   expect(spinnerProps?.message).toBe(null) // a subagent's spinner is left alone
   await sub.unmount()
+  const narrow = await $.ui.mount({
+    plugin: 'glance',
+    surface: 'terminal',
+    component: 'Spinner',
+    props: SPINNER,
+    requestId: 'main',
+    viewport: { columns: 80, rows: 24 },
+  })
+  expect(spinnerProps?.message).toBe(`${LINE.slice(0, 34)}…`) // 80 columns leave 35 for the line
+  await narrow.unmount()
   const spinner = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'Spinner', props: SPINNER, requestId: 'main' })
   expect(spinnerProps?.message).toBe(LINE) // first line only, quotes stripped
 
