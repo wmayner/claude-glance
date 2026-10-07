@@ -1,0 +1,4 @@
+# Type declarations Claude Code writes beside the mod when it loads it
+.claude-plugin/types/
+node_modules/
+.DS_Store
