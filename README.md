@@ -2,17 +2,16 @@
 
 During a long turn it can be hard to tell what Claude is doing, and easy to
 forget what you asked for in the first place. Glance is a Claude Code mod
-that shows both in one line. Once a turn has run for 20 seconds, the spinner's
-usual word is replaced with a summary of the current step and the reason for
-it, followed as usual by the elapsed time and token count:
+that shows both, in two rows above the prompt. Once a turn has run for 20
+seconds, they say what Claude is doing right now and why:
 
-![The spinner during a turn: "Testing glance spinner on mats-dev for 20s · to verify time display and animati…", followed by "(49s · ↓ 1.1k tokens)"](assets/spinner.png)
+```
+Now: Running the test suite on the installed copy
+Why: to check the 0.1.1 release before announcing it
+```
 
-In a narrow terminal the line is shortened so that it stays on one row and
-the elapsed time still fits.
-
-When the turn ends, the last summary stays above the prompt until you send
-your next message, so you can see at a glance what produced the turn:
+When the turn ends, the last summary stays there until you send your next
+message, so you can see at a glance what produced the turn:
 
 ![Above the prompt after the turn: "Last turn: Testing glance spinner on mats-dev for 20s" and "Why: to verify time display and animation don't interfere with rendering"](assets/band.png)
 
@@ -49,13 +48,11 @@ Either way, it runs in every session you start afterwards.
   "yes, do that" still has its context), Claude's last few messages in the
   turn, and its last ten tool calls. It also sees the previous line, so the
   reason stays the same from one update to the next unless the goal changes.
-- If a todo list is driving the spinner, the todo's text is kept and the
-  reason is added after it.
 - If a Haiku call fails, the previous line stays where it is and the reason
   for the failure is logged once in the transcript.
 
-Only the main conversation is summarized. Subagents' own spinners are left
-as they are.
+Only the main conversation is summarized. The spinner is left as Claude Code
+draws it.
 
 ## Cost and privacy
 

@@ -91,24 +91,3 @@ export function splitLine(line: string): { what: string; why: string } {
   const [what = line, why = ''] = line.split(' · ')
   return { what, why }
 }
-
-// Room the spinner row keeps for the engine's own parts: the glyph before the text,
-// and after it the elapsed time, token count and state, as in
-// "(1m 12s · ↓ 3.4k tokens · thinking)". A longer row wraps, and the spinner's
-// animation then breaks it at a different place on every frame.
-const SPINNER_RESERVE = 45
-const SPINNER_MIN = 20
-
-/**
- * What the spinner shows: our line, or the engine's own message (a todo's text)
- * plus our why, cut to fit one row of `columns`. Null when the row is too narrow
- * to fit a useful part of it, so the engine's own word stays.
- */
-export function spinnerMessage(line: string, engineMessage: string | null, columns?: number): string | null {
-  const { why } = splitLine(line)
-  const text = !engineMessage ? line : why ? `${engineMessage.replace(/…$/, '')} · ${why}` : engineMessage
-  if (columns === undefined) return text
-  const room = columns - SPINNER_RESERVE
-  if (room < SPINNER_MIN) return engineMessage
-  return text.length > room ? text.slice(0, room - 1).trimEnd() + '…' : text
-}

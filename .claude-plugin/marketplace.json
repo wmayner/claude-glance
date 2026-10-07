@@ -8,7 +8,7 @@
     {
       "name": "glance",
       "source": "./",
-      "description": "Shows what Claude is doing and why: in the spinner during long turns, and above the prompt after the turn ends."
+      "description": "Shows what Claude is doing and why above the prompt, during long turns and after they end."
     }
   ]
 }

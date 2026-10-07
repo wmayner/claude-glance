@@ -1,7 +1,7 @@
 import type { RenderPropsOf, SessionMessage } from 'claude-code'
 import { expect, mock, test } from 'claude-code/testing'
 
-import { buildDigest, isDue, newTurn, spinnerMessage } from '../hooks/logic'
+import { buildDigest, isDue, newTurn } from '../hooks/logic'
 
 const bandText = async (band: { findAll: (q: { type: 'Text' }) => Promise<{ text?: string }[]> }) =>
   (await band.findAll({ type: 'Text' })).map(t => t.text)
@@ -39,22 +39,6 @@ test('isDue gives a long turn that ended without a line one last refresh', () =>
   expect(isDue({ ...long, summarizedActivity: 1 }, 30_000)).toBe(false)
 })
 
-test('spinnerMessage keeps a todo message and adds the why', () => {
-  expect(spinnerMessage('Editing a.ts · so b works', null)).toBe('Editing a.ts · so b works')
-  expect(spinnerMessage('Editing a.ts · so b works', 'Running tests…')).toBe('Running tests · so b works')
-  expect(spinnerMessage('no separator', 'Running tests…')).toBe('Running tests…')
-})
-
-test('spinnerMessage fits one row and leaves room for the time and token count', () => {
-  const long = 'Bumping CI actions to v7 and pushing to github · so the plugin passes latest action version requirements'
-  expect(spinnerMessage(long, null, 200)).toBe(long)
-  const cut = spinnerMessage(long, null, 100)
-  expect(cut?.length).toBe(55)
-  expect(cut?.endsWith('…')).toBe(true)
-  expect(spinnerMessage(long, null, 50)).toBe(null) // too narrow: the engine's word stays
-  expect(spinnerMessage(long, 'Running tests…', 50)).toBe('Running tests…')
-})
-
 test('buildDigest centres on the last typed prompt, not tool results', () => {
   const digest = buildDigest(
     [
@@ -75,19 +59,16 @@ test('buildDigest centres on the last typed prompt, not tool results', () => {
   expect(buildDigest([], null)).toBe('')
 })
 
-const SPINNER: RenderPropsOf['Spinner'] = { word: 'Sauteing', message: null, suffix: '…', mode: 'tool-use' }
 const BAND = { hasSurvey: false, isWorking: false, maxRows: 5, bodyColumns: 80 } as RenderPropsOf['AbovePrompt']
 const WHAT = 'Editing statusline.sh'
 const WHY = 'so the status line shows cache warmth'
 const LINE = `${WHAT} · ${WHY}`
 
-test('a long turn gets a line in the spinner, then in the band once it ends', async ($, on) => {
+test('a long turn gets a line in the band while it runs and after it ends', async ($, on) => {
   const clock = mock.clock(on)
   const asks: string[] = []
-  let spinnerProps: RenderPropsOf['Spinner'] | undefined
 
   on('session.start', ($, e) => ({ cwd: e.cwd }))
-  on('session.id', () => ({ value: 'main' }))
   on('turn.start', ($, e) => ({ turnId: e.turnId }))
   on('turn.complete', ($, e) => ({ text: e.answer }))
   on('tool.call', () => ({ result: {}, text: '' }) as never)
@@ -101,11 +82,6 @@ test('a long turn gets a line in the spinner, then in the band once it ends', as
         usage: { input_tokens: 0, output_tokens: 0, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
       },
     }
-  })
-  on('ui.render', { component: 'Spinner' }, ($, e) => {
-    spinnerProps = e.props
-    const { Text } = $.ui.resolve(e)
-    return <Text>spinner</Text>
   })
   on('ui.render', { component: 'AbovePrompt' }, ($, e) => {
     const { Text } = $.ui.resolve(e)
@@ -122,21 +98,11 @@ test('a long turn gets a line in the spinner, then in the band once it ends', as
   expect(asks).toHaveLength(1)
   expect(asks[0]).toContain('Current user request:\nshow cache warmth')
 
-  const sub = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'Spinner', props: SPINNER, requestId: 'agent-1' })
-  expect(spinnerProps?.message).toBe(null) // a subagent's spinner is left alone
-  await sub.unmount()
-  const narrow = await $.ui.mount({
-    plugin: 'glance',
-    surface: 'terminal',
-    component: 'Spinner',
-    props: SPINNER,
-    requestId: 'main',
-    viewport: { columns: 80, rows: 24 },
-  })
-  expect(spinnerProps?.message).toBe(`${LINE.slice(0, 34)}…`) // 80 columns leave 35 for the line
-  await narrow.unmount()
-  const spinner = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'Spinner', props: SPINNER, requestId: 'main' })
-  expect(spinnerProps?.message).toBe(LINE) // first line only, quotes stripped
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const band = await $.ui.mount({ plugin: 'glance', surface, component: 'AbovePrompt', props: { ...BAND, isWorking: true } })
+    expect(await bandText(band)).toEqual([`Now: ${WHAT}`, 'Now:', `Why: ${WHY}`, 'Why:']) // first line only, quotes stripped
+    await band.unmount()
+  }
 
   await clock.advance(60_000)
   expect(asks).toHaveLength(1) // no tool calls since, so no refresh
@@ -156,8 +122,6 @@ test('a long turn gets a line in the spinner, then in the band once it ends', as
   expect(asks).toHaveLength(2) // nothing after the turn ended
 
   await $.turn.start({ text: 'quick question', turnId: 't2' })
-  await spinner.redraw()
-  expect(spinnerProps?.message).toBe(null) // engine's own word again
   const band = await $.ui.mount({ plugin: 'glance', surface: 'terminal', component: 'AbovePrompt', props: BAND })
   expect((await band.find({ type: 'Text' }))?.text).toBe('engine')
 })
@@ -166,7 +130,6 @@ test('a failing model is retried at the normal pace, and an ended turn is not re
   const clock = mock.clock(on)
   let asks = 0
   on('session.start', ($, e) => ({ cwd: e.cwd }))
-  on('session.id', () => ({ value: 'main' }))
   on('turn.start', ($, e) => ({ turnId: e.turnId }))
   on('turn.complete', ($, e) => ({ text: e.answer }))
   on('tool.call', () => ({ result: {}, text: '' }) as never)
@@ -201,7 +164,6 @@ test('a failing model is retried at the normal pace, and an ended turn is not re
 test('a turn with no typed prompt continues the previous one and keeps its line', async ($, on) => {
   const clock = mock.clock(on)
   on('session.start', ($, e) => ({ cwd: e.cwd }))
-  on('session.id', () => ({ value: 'main' }))
   on('turn.start', ($, e) => ({ turnId: e.turnId }))
   on('turn.complete', ($, e) => ({ text: e.answer }))
   on('fs.write', () => ({ value: undefined }))

@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
-import { buildDigest, cleanLine, isDue, newTurn, spinnerMessage, splitLine, SYSTEM, TICK_MS } from './logic'
+import { buildDigest, cleanLine, isDue, newTurn, splitLine, SYSTEM, TICK_MS } from './logic'
 import type { Turn } from './logic'
 import type { Line } from '../types'
 
@@ -73,17 +73,11 @@ export const register: Register = on => {
     return next(e)
   })
 
-  on('ui.render', { component: 'Spinner' }, async ($, e, next) => {
-    // The main thread's spinner carries the session id; a subagent's carries its own.
-    if (e.requestId !== (await $.session.id())) return next(e)
-    const text = await read($, line)
-    if (text === null) return next(e)
-    const message = spinnerMessage(text, e.props.message, e.viewport?.columns)
-    return next({ ...e, props: { ...e.props, message } })
-  })
-
+  // The band above the prompt, during the turn and after it. The spinner is left
+  // to the engine: its own text after the word changes length (hook status,
+  // effort), so a summary there would wrap the row on some frames.
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    if (e.props.hasSurvey || e.props.isWorking) return next(e)
+    if (e.props.hasSurvey) return next(e)
     const text = await read($, line)
     if (text === null) return next(e)
     const { what, why } = splitLine(text)
@@ -91,7 +85,7 @@ export const register: Register = on => {
     return (
       <Box flexDirection="column">
         <Text dimColor wrap="truncate-end">
-          <Text bold>Last turn:</Text> {what}
+          <Text bold>{e.props.isWorking ? 'Now:' : 'Last turn:'}</Text> {what}
         </Text>
         {why !== '' && (
           <Text dimColor wrap="truncate-end">

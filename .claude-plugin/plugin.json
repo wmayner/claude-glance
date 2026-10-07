@@ -1,12 +1,16 @@
 {
   "name": "glance",
-  "version": "0.1.1",
-  "description": "Shows what Claude is doing and why: in the spinner during long turns, and above the prompt after the turn ends.",
+  "version": "0.2.0",
+  "description": "Shows what Claude is doing and why above the prompt, during long turns and after they end.",
   "author": {
     "name": "Will Mayner"
   },
   "repository": "https://github.com/wmayner/claude-glance",
   "license": "MIT",
-  "keywords": ["status", "spinner", "summary", "mod"],
+  "keywords": [
+    "status",
+    "summary",
+    "mod"
+  ],
   "types": "./types/index.d.ts"
 }
