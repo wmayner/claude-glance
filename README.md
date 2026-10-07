@@ -6,9 +6,7 @@ that shows both in one line. Once a turn has run for 20 seconds, the spinner's
 usual word is replaced with a summary of the current step and the reason for
 it, followed as usual by the elapsed time and token count:
 
-```
-Editing statusline.sh to parse cache stats · so the status line shows cache warmth…
-```
+![The spinner during a turn: "Testing glance spinner on mats-dev for 20s · to verify time display and animati…", followed by "(49s · ↓ 1.1k tokens)"](assets/spinner.png)
 
 In a narrow terminal the line is shortened so that it stays on one row and
 the elapsed time still fits.
@@ -16,10 +14,7 @@ the elapsed time still fits.
 When the turn ends, the last summary stays above the prompt until you send
 your next message, so you can see at a glance what produced the turn:
 
-```
-Last turn: Editing statusline.sh to parse cache stats
-Why: so the status line shows cache warmth
-```
+![Above the prompt after the turn: "Last turn: Testing glance spinner on mats-dev for 20s" and "Why: to verify time display and animation don't interfere with rendering"](assets/band.png)
 
 The summaries are written by Claude Haiku.
 
