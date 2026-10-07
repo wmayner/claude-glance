@@ -92,6 +92,10 @@ touch the second file. Claude Code writes the API's type declarations into
 `.claude-plugin/types/` the first time it loads the mod; after that,
 `npx tsc -p .` type-checks it.
 
+## Credits
+
+The idea for glance came from Niall Dalton.
+
 ## License
 
 MIT
